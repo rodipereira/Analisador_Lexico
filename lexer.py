@@ -103,6 +103,11 @@ class Lexer:
                         continue
                     while self.peek().isdigit():
                         number += self.advance()
+                # CORREÇÃO: Detectar múltiplos pontos decimais
+                elif self.peek() == '.' and has_dot:
+                    self.error('Invalid number format: multiple decimal points', line, column)
+                    self.advance()  # Consumir o ponto inválido
+                    continue
                 if number.endswith('.'):
                     self.error('Invalid number format', line, column)
                     continue
