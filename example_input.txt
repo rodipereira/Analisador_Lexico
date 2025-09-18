@@ -1,0 +1,9 @@
+int x = 10
+float y = 5.5
+if (x >= y) {
+    print(x)
+}
+# Comentário de linha
+/* Comentário
+   de múltiplas linhas */
+x = x + 1
