@@ -57,63 +57,71 @@ class Lexer:
             current = self.peek()
             line, column = self.current_line, self.current_column
 
+            # Espaços
             if current.isspace():
                 self.advance()
                 continue
 
+            # Comentário linha única
             if current == '#':
                 self.advance()
                 while self.peek() != '\n' and self.peek():
                     self.advance()
                 continue
 
+            # Comentário de bloco /* ... */
             if current == '/' and self.code[self.pos + 1:self.pos + 2] == '*':
                 self.advance()
                 self.advance()
                 while not (self.peek() == '*' and self.code[self.pos + 1:self.pos + 2] == '/'):
                     if not self.peek():
                         self.error('Unterminated block comment', line, column)
-                        return
                     self.advance()
                 self.advance()
                 self.advance()
                 continue
 
+            # Identificadores (sem acentos)
             if current.isalpha() or current == '_':
+                if not re.match(r"[a-zA-Z_]", current):
+                    self.error(f"Invalid identifier start: {current}", line, column)
+
                 identifier = ''
-                while self.peek().isalnum() or self.peek() == '_':
+                while re.match(r"[a-zA-Z0-9_]", self.peek()):
                     identifier += self.advance()
+
                 token_type = RESERVED_WORDS.get(identifier, 'IDENTIFIER')
                 self.add_token(token_type, identifier, line, column)
                 continue
 
+            # Números
             if current.isdigit() or (current == '.' and self.code[self.pos + 1:self.pos + 2].isdigit()):
                 number = ''
-                has_dot = False
+                dot_count = 0
+
                 if current == '.':
                     number += self.advance()
-                    has_dot = True
-                while self.peek().isdigit():
-                    number += self.advance()
-                if self.peek() == '.' and not has_dot:
-                    number += self.advance()
-                    has_dot = True
-                    if not self.peek().isdigit():
-                        self.error('Invalid number format', line, column)
-                        continue
-                    while self.peek().isdigit():
+                    dot_count += 1
+
+                while self.peek().isdigit() or self.peek() == '.':
+                    if self.peek() == '.':
+                        dot_count += 1
+                        if dot_count > 1:  # Mais de um ponto => erro
+                            self.error("Invalid number format: multiple decimal points", line, column)
                         number += self.advance()
-                # CORREÇÃO: Detectar múltiplos pontos decimais
-                elif self.peek() == '.' and has_dot:
-                    self.error('Invalid number format: multiple decimal points', line, column)
-                    self.advance()  # Consumir o ponto inválido
-                    continue
+                        continue
+                    number += self.advance()
+
                 if number.endswith('.'):
-                    self.error('Invalid number format', line, column)
-                    continue
+                    self.error('Invalid number format: ends with dot', line, column)
+
+                if dot_count > 1:
+                    continue  # não adiciona token
+
                 self.add_token('NUMBER', number, line, column)
                 continue
 
+            # Operadores
             if current in '+-*/=()<>!':
                 op = self.advance()
                 if op in ['=', '!', '<', '>'] and self.peek() == '=':
@@ -121,17 +129,16 @@ class Lexer:
                 self.add_token('OPERATOR', op, line, column)
                 continue
 
-            # Punctuation: semicolon, comma, braces, brackets
+            # Pontuação
             if current in ';,{}[]':
                 punct = self.advance()
                 self.add_token('PUNCTUATION', punct, line, column)
                 continue
 
+            # Qualquer outro caractere inválido
             self.error(f'Unexpected character: {current}', line, column)
-            self.advance()
 
         return self.tokens
 
     def error(self, message, line, column):
-        print(f"❌ [ERRO LÉXICO] {message} na linha {line}, coluna {column}")
-        print(f"   💡 Dica: Verifique se o caractere é válido na linguagem")
+        raise Exception(f"❌ [ERRO LÉXICO] {message} na linha {line}, coluna {column}")
