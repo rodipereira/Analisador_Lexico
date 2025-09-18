@@ -25,7 +25,6 @@ def print_tokens_table(tokens):
     print("-" * 80)
     
     for i, token in enumerate(tokens, 1):
-        # Determinar descrição baseada no tipo
         descriptions = {
             'INT': 'Tipo de dados inteiro',
             'FLOAT': 'Tipo de dados decimal',
@@ -50,7 +49,6 @@ def print_statistics(tokens):
     print("📊 ESTATÍSTICAS DA ANÁLISE:")
     print("-" * 40)
     
-    # Contar tipos de tokens
     token_counts = {}
     for token in tokens:
         token_counts[token.type] = token_counts.get(token.type, 0) + 1
@@ -89,9 +87,9 @@ def main():
         print("❌ ERRO: Arquivo 'example_input.txt' não encontrado!")
         print("   Certifique-se de que o arquivo existe no diretório atual.")
     except Exception as e:
-        print(f"❌ ERRO: {e}")
+        print(str(e))   # agora mostra erros léxicos também
     
-    print("✅ Análise concluída com sucesso!")
+    print("✅ Análise concluída!")
     print("=" * 80)
 
 if __name__ == "__main__":
