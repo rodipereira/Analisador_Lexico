@@ -17,3 +17,18 @@ O analisador exibirá os tokens reconhecidos no terminal.
 
 ## Requisitos implementados
 Todos os itens do Checkpoint 01 foram implementados conforme solicitado.
+
+## Funcionalidades implementadas
+- ✅ Reconhecimento de identificadores e palavras reservadas
+- ✅ Análise de números inteiros e decimais
+- ✅ Detecção de operadores simples e compostos (+, -, *, /, =, ==, !=, <=, >=)
+- ✅ Tratamento de comentários de linha (#) e bloco (/* */)
+- ✅ Reconhecimento de pontuação (;, {}, [], etc.)
+- ✅ Validação rigorosa de números decimais (rejeita múltiplos pontos)
+- ✅ Interface amigável com tabelas e estatísticas
+- ✅ Tratamento de erros com mensagens claras
+
+## Correções implementadas
+- **Bug fix**: Corrigido problema de validação de números decimais múltiplos
+  - Antes: `1.01.1` era aceito incorretamente
+  - Agora: Números com múltiplos pontos decimais são rejeitados com erro específico
