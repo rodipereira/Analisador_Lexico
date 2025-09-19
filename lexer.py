@@ -1,4 +1,3 @@
-import re
 from my_token import Token
 from reserved_words import RESERVED_WORDS
 
@@ -109,7 +108,7 @@ class Lexer:
                     self.advance()  # Consumir o ponto inválido
                     continue
                 if number.endswith('.'):
-                    self.error('Invalid number format', line, column)
+                    self.error('Invalid number format: number ending with decimal point', line, column)
                     continue
                 self.add_token('NUMBER', number, line, column)
                 continue
@@ -127,11 +126,21 @@ class Lexer:
                 self.add_token('PUNCTUATION', punct, line, column)
                 continue
 
+            # Detectar caracteres inválidos específicos
+            if current == 'ç':
+                self.error('Invalid character: ç (not allowed)', line, column)
+                self.advance()
+                continue
+            
+            if current == '@':
+                self.error('Invalid character: @ (not allowed)', line, column)
+                self.advance()
+                continue
+
             self.error(f'Unexpected character: {current}', line, column)
             self.advance()
 
         return self.tokens
 
     def error(self, message, line, column):
-        print(f"❌ [ERRO LÉXICO] {message} na linha {line}, coluna {column}")
-        print(f"   💡 Dica: Verifique se o caractere é válido na linguagem")
+        print(f"ERRO: {message} na linha {line}, coluna {column}")
