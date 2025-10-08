@@ -26,11 +26,6 @@ class Lexer:
     def add_token(self, type_, value, line, column):
         self.tokens.append(Token(type_, value, line, column))
 
-    def match(self, expected):
-        if self.peek() == expected:
-            self.advance()
-            return True
-        return False
 
     def skip_whitespace(self):
         while self.peek().isspace():
@@ -56,63 +51,79 @@ class Lexer:
             current = self.peek()
             line, column = self.current_line, self.current_column
 
+            if not current:
+                break
+
             if current.isspace():
                 self.advance()
                 continue
 
+            # Line comment starting with '#'
             if current == '#':
                 self.advance()
-                while self.peek() != '\n' and self.peek():
+                while self.peek() and self.peek() != '\n':
                     self.advance()
                 continue
 
+            # Block comment: /* ... */
             if current == '/' and self.code[self.pos + 1:self.pos + 2] == '*':
-                self.advance()
-                self.advance()
+                self.advance(); self.advance()
                 while not (self.peek() == '*' and self.code[self.pos + 1:self.pos + 2] == '/'):
                     if not self.peek():
                         self.error('Unterminated block comment', line, column)
-                        return
+                        return self.tokens
                     self.advance()
-                self.advance()
-                self.advance()
+                self.advance(); self.advance()
                 continue
 
+            # Identifiers and reserved words
             if current.isalpha() or current == '_':
                 identifier = ''
-                while self.peek().isalnum() or self.peek() == '_':
+                while self.peek() and (self.peek().isalnum() or self.peek() == '_'):
                     identifier += self.advance()
                 token_type = RESERVED_WORDS.get(identifier, 'IDENTIFIER')
                 self.add_token(token_type, identifier, line, column)
                 continue
 
+            # Numbers: integer or float with a single decimal point
             if current.isdigit() or (current == '.' and self.code[self.pos + 1:self.pos + 2].isdigit()):
                 number = ''
                 has_dot = False
                 if current == '.':
                     number += self.advance()
                     has_dot = True
-                while self.peek().isdigit():
+                    # . must be followed by digit due to the initial check
+                while self.peek() and self.peek().isdigit():
                     number += self.advance()
+
+                # optional single fractional part
                 if self.peek() == '.' and not has_dot:
                     number += self.advance()
                     has_dot = True
                     if not self.peek().isdigit():
+                        # e.g., '1.' is invalid
                         self.error('Invalid number format', line, column)
                         continue
-                    while self.peek().isdigit():
+                    while self.peek() and self.peek().isdigit():
                         number += self.advance()
-                # CORREÇÃO: Detectar múltiplos pontos decimais
-                elif self.peek() == '.' and has_dot:
-                    self.error('Invalid number format: multiple decimal points', line, column)
-                    self.advance()  # Consumir o ponto inválido
+
+                # If immediately after the numeric sequence follows a letter/underscore or another dot -> invalid
+                nxt = self.peek()
+                if nxt and (nxt.isalpha() or nxt == '_' or nxt == '.'):
+                    # consume the rest of the contiguous invalid sequence to avoid splitting it into tokens
+                    while self.peek() and (self.peek().isalnum() or self.peek() in '._'):
+                        self.advance()
+                    self.error('Invalid number format', line, column)
                     continue
+
                 if number.endswith('.'):
-                    self.error('Invalid number format: number ending with decimal point', line, column)
+                    self.error('Invalid number format', line, column)
                     continue
+
                 self.add_token('NUMBER', number, line, column)
                 continue
 
+            # Operators
             if current in '+-*/=()<>!':
                 op = self.advance()
                 if op in ['=', '!', '<', '>'] and self.peek() == '=':
@@ -120,23 +131,19 @@ class Lexer:
                 self.add_token('OPERATOR', op, line, column)
                 continue
 
-            # Punctuation: semicolon, comma, braces, brackets
+            # Punctuation
             if current in ';,{}[]':
                 punct = self.advance()
                 self.add_token('PUNCTUATION', punct, line, column)
                 continue
 
-            # Detectar caracteres inválidos específicos
-            if current == 'ç':
-                self.error('Invalid character: ç (not allowed)', line, column)
-                self.advance()
-                continue
-            
-            if current == '@':
-                self.error('Invalid character: @ (not allowed)', line, column)
+            # Specific disallowed characters (example)
+            if current in ('ç', '@'):
+                self.error(f'Invalid character: {current}', line, column)
                 self.advance()
                 continue
 
+            # Anything else is unexpected
             self.error(f'Unexpected character: {current}', line, column)
             self.advance()
 

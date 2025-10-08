@@ -7,7 +7,9 @@ def main():
         with open("example_input.txt", "r", encoding="utf-8") as file:
             code = file.read()
         
+        # Cria uma instância do lexer com o código
         lexer = Lexer(code)
+        # executa a analise lexica
         tokens = lexer.tokenize()
         
         for token in tokens:
