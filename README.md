@@ -32,3 +32,8 @@ Todos os itens do Checkpoint 01 foram implementados conforme solicitado.
 - **Bug fix**: Corrigido problema de validação de números decimais múltiplos
   - Antes: `1.01.1` era aceito incorretamente
   - Agora: Números com múltiplos pontos decimais são rejeitados com erro específico
+
+## Alterações recentes (resumo básico)
+- O analisador agora trata chaves e pontuação (`{ } ; , [ ]`) como tokens de pontuação.
+- Números do tipo `1a` ou sequências com vários pontos (`1.1.1.1`) são considerados erro léxico e não são divididos em tokens válidos.
+- Removido método não utilizado `match()` do lexer.
