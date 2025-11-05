@@ -1,0 +1,7 @@
+main {
+    var {
+        x:int;
+    
+    input(x);
+    print(x);
+}
