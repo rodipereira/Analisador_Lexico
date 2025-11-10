@@ -1,6 +1,0 @@
-int x = 10
-float y = 5.5
-float invalid1 = 1.01.1
-float invalid2 = 3.14.15
-float valid = 2.718
-int z = 42

@@ -1,22 +1,32 @@
 from lexer import Lexer
+from parser import Parser, ParseError
 
 # Aluno: Rodrigo Pereira de Almeida
 
 def main():
+    # prefer program file if present
+    filename = "programa_ckp2_qui_noite.txt"
     try:
-        with open("example_input.txt", "r", encoding="utf-8") as file:
+        with open(filename, "r", encoding="utf-8") as file:
             code = file.read()
-        
-        # Cria uma instância do lexer com o código
+
         lexer = Lexer(code)
-        # executa a analise lexica
         tokens = lexer.tokenize()
-        
+
+        # print tokens (optional)
         for token in tokens:
-            print(f"{token.type} {token.value} {token.line}:{token.column}")
-            
+            print(f"{token.type}({token.value}) at {token.line}:{token.column}")
+
+        # parse
+        parser = Parser(tokens)
+        try:
+            parser.parse()
+            print("Parsing succeeded: programa válido.")
+        except ParseError as pe:
+            print(f"Syntax error: {pe}")
+
     except FileNotFoundError:
-        print("ERRO: Arquivo 'example_input.txt' não encontrado!")
+        print(f"ERRO: Arquivo '{filename}' não encontrado!")
     except Exception as e:
         print(f"ERRO: {e}")
 

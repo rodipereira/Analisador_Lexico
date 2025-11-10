@@ -1,7 +1,15 @@
 RESERVED_WORDS = {
+    'main': 'MAIN',
+    'var': 'VAR',
     'int': 'INT',
-    'float': 'FLOAT',
+    'real': 'REAL',
+    'input': 'INPUT',
     'print': 'PRINT',
     'if': 'IF',
-    'else': 'ELSE'
+    'then': 'THEN',
+    'else': 'ELSE',
+    'while': 'WHILE',
+    'e': 'AND',
+    'ou': 'OR',
+    'nao': 'NOT'
 }

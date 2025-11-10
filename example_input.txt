@@ -1,0 +1,89 @@
+
+// === programa_ckp2_qui_noite.txt ===
+main {
+	var {
+		x:int;
+		y:int;
+		z:int;
+		temp:int;
+	}
+
+	# Ordena três números em ordem crescente
+	input(x);
+	input(y);
+	input(z);
+
+	if x > y then {
+		temp <- y;
+		y <- x;
+		x <- temp;
+	}
+
+	if (x > z E y <= z OU x != z) then {
+		temp <- z;
+		z <- x;
+		x <- temp;
+	}
+
+	if y > z then {
+		temp <- z;
+		z <- y;
+		y <- temp;
+	}
+
+	print("Ordem crescente:");
+	print(x);
+	print(y);
+	print(z);
+}
+
+// === tests/test_ok.txt ===
+main {
+	var {
+		x:int;
+	}
+	input(x);
+	print(x);
+}
+
+// === tests/test_missing_semicolon.txt ===
+main {
+	var {
+		x:int
+	}
+	input(x);
+	print(x);
+}
+
+// === tests/test_wrong_assign.txt ===
+main {
+	var {
+		x:int;
+	}
+	x = 5;
+}
+
+// === tests/test_unclosed_block.txt ===
+main {
+	var {
+		x:int;
+
+	input(x);
+	print(x);
+}
+
+// === test_errors.txt ===
+x = 1.
+y = 1..
+z = ç
+w = @
+a = 123
+b = 45.67
+
+// === test_invalid_numbers.txt ===
+int x = 10
+float y = 5.5
+float invalid1 = 1.01.1
+float invalid2 = 3.14.15
+float valid = 2.718
+int z = 42

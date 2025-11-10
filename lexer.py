@@ -76,16 +76,16 @@ class Lexer:
                 self.advance(); self.advance()
                 continue
 
-            # Identifiers and reserved words
+            # Identifiers and reserved words (case-insensitive)
             if current.isalpha() or current == '_':
                 identifier = ''
                 while self.peek() and (self.peek().isalnum() or self.peek() == '_'):
                     identifier += self.advance()
-                token_type = RESERVED_WORDS.get(identifier, 'IDENTIFIER')
+                token_type = RESERVED_WORDS.get(identifier.lower(), 'IDENTIFIER')
                 self.add_token(token_type, identifier, line, column)
                 continue
 
-            # Numbers: integer or float with a single decimal point
+            # Numbers: integer or real with a single decimal point
             if current.isdigit() or (current == '.' and self.code[self.pos + 1:self.pos + 2].isdigit()):
                 number = ''
                 has_dot = False
@@ -120,21 +120,65 @@ class Lexer:
                     self.error('Invalid number format', line, column)
                     continue
 
-                self.add_token('NUMBER', number, line, column)
+                # decide NUMINT or NUMREAL
+                if has_dot:
+                    self.add_token('NUMREAL', number, line, column)
+                else:
+                    self.add_token('NUMINT', number, line, column)
                 continue
 
-            # Operators
-            if current in '+-*/=()<>!':
+            # Assignment operator '<-'
+            if current == '<' and self.code[self.pos + 1:self.pos + 2] == '-':
+                self.advance(); self.advance()
+                self.add_token('ASSIGN', '<-', line, column)
+                continue
+
+            # Increment/Decrement
+            if current == '+' and self.code[self.pos + 1:self.pos + 2] == '+':
+                self.advance(); self.advance()
+                self.add_token('INC', '++', line, column)
+                continue
+            if current == '-' and self.code[self.pos + 1:self.pos + 2] == '-':
+                self.advance(); self.advance()
+                self.add_token('DEC', '--', line, column)
+                continue
+
+            # Operators (including relational): + - * / == != <= >= < >
+            if current in '+-*/=<>!':
                 op = self.advance()
                 if op in ['=', '!', '<', '>'] and self.peek() == '=':
                     op += self.advance()
                 self.add_token('OPERATOR', op, line, column)
                 continue
 
-            # Punctuation
-            if current in ';,{}[]':
-                punct = self.advance()
-                self.add_token('PUNCTUATION', punct, line, column)
+            # Punctuation specific tokens
+            if current == '(':
+                self.advance(); self.add_token('LPAREN', '(', line, column); continue
+            if current == ')':
+                self.advance(); self.add_token('RPAREN', ')', line, column); continue
+            if current == '{':
+                self.advance(); self.add_token('LBRACE', '{', line, column); continue
+            if current == '}':
+                self.advance(); self.add_token('RBRACE', '}', line, column); continue
+            if current == ';':
+                self.advance(); self.add_token('SEMICOLON', ';', line, column); continue
+            if current == ',':
+                self.advance(); self.add_token('COMMA', ',', line, column); continue
+            if current == ':':
+                self.advance(); self.add_token('COLON', ':', line, column); continue
+
+            # String literals (CADEIA)
+            if current == '"':
+                self.advance()
+                string_val = ''
+                while self.peek() and self.peek() != '"':
+                    # simple support for escaped quotes could be added here
+                    string_val += self.advance()
+                if self.peek() != '"':
+                    self.error('Unterminated string literal', line, column)
+                    continue
+                self.advance()  # consume closing quote
+                self.add_token('CADEIA', string_val, line, column)
                 continue
 
             # Specific disallowed characters (example)
