@@ -20,6 +20,17 @@ class Lexer:
             return char
         return ''
 
+    def is_ascii_letter(self, c):
+        """Return True for ASCII letters or underscore only (a-z, A-Z, _)."""
+        if not c:
+            return False
+        return c == '_' or ('a' <= c <= 'z') or ('A' <= c <= 'Z')
+
+    def is_ascii_alnum_or_underscore(self, c):
+        if not c:
+            return False
+        return ('0' <= c <= '9') or ('a' <= c <= 'z') or ('A' <= c <= 'Z') or c == '_'
+
     def peek(self):
         return self.code[self.pos] if self.pos < len(self.code) else ''
 
@@ -76,10 +87,10 @@ class Lexer:
                 self.advance(); self.advance()
                 continue
 
-            # Identifiers and reserved words (case-insensitive)
-            if current.isalpha() or current == '_':
+            # Identifiers and reserved words (ASCII letters + underscore only, case-insensitive)
+            if self.is_ascii_letter(current):
                 identifier = ''
-                while self.peek() and (self.peek().isalnum() or self.peek() == '_'):
+                while self.peek() and self.is_ascii_alnum_or_underscore(self.peek()):
                     identifier += self.advance()
                 token_type = RESERVED_WORDS.get(identifier.lower(), 'IDENTIFIER')
                 self.add_token(token_type, identifier, line, column)
@@ -109,7 +120,7 @@ class Lexer:
 
                 # If immediately after the numeric sequence follows a letter/underscore or another dot -> invalid
                 nxt = self.peek()
-                if nxt and (nxt.isalpha() or nxt == '_' or nxt == '.'):
+                if nxt and (self.is_ascii_letter(nxt) or nxt == '_' or nxt == '.'):
                     # consume the rest of the contiguous invalid sequence to avoid splitting it into tokens
                     while self.peek() and (self.peek().isalnum() or self.peek() in '._'):
                         self.advance()
