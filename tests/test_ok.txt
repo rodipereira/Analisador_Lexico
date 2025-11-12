@@ -1,0 +1,14 @@
+main {main {
+
+    var {    var {
+
+        x:int;        x:int;
+
+    }    }
+
+    input(x);    input(x);
+
+    print(x);    print(x);
+
+}}
+

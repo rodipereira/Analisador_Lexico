@@ -1,0 +1,12 @@
+main {main {
+
+    var {    var {
+
+        x:int;        x:int;
+
+    }    }
+
+    x = 5;    x = 5;
+
+}}
+

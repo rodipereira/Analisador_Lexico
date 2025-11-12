@@ -5,6 +5,7 @@ class Lexer:
     def __init__(self, code):
         self.code = code
         self.tokens = []
+        self.errors = []
         self.current_line = 1
         self.current_column = 1
         self.pos = 0
@@ -205,4 +206,7 @@ class Lexer:
         return self.tokens
 
     def error(self, message, line, column):
-        print(f"ERRO: {message} na linha {line}, coluna {column}")
+        # record and print lexical errors
+        msg = f"ERRO: {message} na linha {line}, coluna {column}"
+        self.errors.append(msg)
+        print(msg)

@@ -1,0 +1,82 @@
+programa :
+    'main' '{' corpo '}';
+
+corpo :
+    secaoDeclaracoes listaComandos;
+
+secaoDeclaracoes :
+    'var' '{' listaDeclaracoes '}';
+
+listaDeclaracoes :
+    declaracao listaDeclaracoes |
+    declaracao;
+
+declaracao :
+    ID ':' tipo ';';
+
+tipo :
+    'int' |
+    'real';
+
+listaComandos :
+    comando listaComandos |
+    comando;
+
+comando :
+    atribuicao |
+    leitura |
+    escrita |
+    condicional |
+    repeticao |
+    bloco;
+
+atribuicao :
+    ID '<-' expressaoAritmetica ';';
+
+leitura :
+    'input(' ID ')' ';';
+
+escrita :
+    'print(' (ID | CADEIA) ')' ';';
+
+condicional :
+    'if' expressaoRelacional 'then' comando |
+    'if' expressaoRelacional 'then' comando 'else' comando;
+
+repeticao :
+    'while' expressaoRelacional comando;
+
+bloco :
+    '{' listaComandos '}';
+
+expressaoAritmetica :
+    expressaoAritmetica '+' termo |
+    expressaoAritmetica '-' termo |
+    termo;
+
+termo :
+    termo '*' fator |
+    termo '/' fator |
+    fator;
+
+fator :
+    NUMINT |
+    NUMREAL |
+    ID |
+    '(' expressaoAritmetica ')' |
+    ID '++' |
+    ID '--';
+
+expressaoRelacional :
+    expressaoRelacional operadorLogico termoRelacional |
+    termoRelacional;
+
+termoRelacional :
+    expressaoAritmetica OP_REL expressaoAritmetica |
+    '(' expressaoRelacional ')';
+
+operadorLogico :
+    'E' |
+    'OU' |
+    'NAO';
+
