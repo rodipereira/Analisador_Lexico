@@ -31,25 +31,13 @@ class Parser:
         tok = self.peek()
         if not tok:
             self.error(f"Unexpected end of input, expected {type_} {value if value else ''}", tok)
+            # synchronize to recover
+            self.synchronize()
             return None
         if tok.type != type_ or (value is not None and tok.value != value):
+            # Report the mismatch and synchronize; do NOT attempt to silently skip ahead to find the token,
+            # because that behavior can mask missing critical tokens (e.g., '<-', ';', operators).
             self.error(f"Expected {type_} {value if value else ''}, got {tok.type}({tok.value})", tok)
-            # Attempt simple recovery: look ahead for the expected token before a statement terminator
-            i = self.pos
-            found = False
-            while i < len(self.tokens):
-                if self.tokens[i].type == type_ and (value is None or self.tokens[i].value == value):
-                    found = True
-                    break
-                if self.tokens[i].type in ('SEMICOLON', 'RBRACE'):
-                    break
-                i += 1
-            if found:
-                # skip until the expected token and consume it
-                while self.pos < i:
-                    self.advance()
-                return self.advance()
-            # otherwise synchronize to next statement boundary
             self.synchronize()
             return None
         return self.advance()
